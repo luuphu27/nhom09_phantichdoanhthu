@@ -9,12 +9,12 @@ def main():
         
         # Thiết lập đường dẫn tương đối từ vị trí file main.py
         base_path = Path(__file__).parent
-        data_file = base_path / "data" / "superstore_sales.csv"
+        data_file = base_path / "data" / "train.csv"
         
         # Khởi tạo lần lượt 3 lớp theo đúng yêu cầu
         loader = DataLoader(data_file)
         loader.load_data()
-        
+        loader.clean_data()
         analyzer = SalesAnalyzer()
         analyzer.analyze_data()
         
