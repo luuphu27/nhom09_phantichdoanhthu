@@ -40,3 +40,43 @@ class DataLoader:
         print("\nKiểu dữ liệu của các cột:")
         print(self.df.dtypes)
         print("-" * 45)
+        
+        logging.info("Đang tiến hành chuẩn hóa Order Date và Ship Date...")
+
+        self.df['Order Date'] = pd.to_datetime(
+            self.df['Order Date'],
+            format='mixed',
+            dayfirst=False,
+            errors='coerce'
+        )
+
+        self.df['Ship Date'] = pd.to_datetime(
+            self.df['Ship Date'],
+            format='mixed',
+            dayfirst=False,
+            errors='coerce'
+        )
+
+        self.df = self.df.dropna(
+            subset=['Order Date', 'Ship Date']
+        ).copy()
+
+        start_date = pd.to_datetime('2015-01-03')
+        end_date = pd.to_datetime('2018-12-30')
+
+        mask_date_range = (
+            (self.df['Order Date'] >= start_date) &
+            (self.df['Order Date'] <= end_date) &
+            (self.df['Ship Date'] >= start_date) &
+            (self.df['Ship Date'] <= end_date)
+        )
+
+        self.df = self.df[mask_date_range].copy()
+
+        self.df = self.df[
+            self.df['Ship Date'] >= self.df['Order Date']
+        ].copy()
+
+        logging.info("Hoàn thành chuẩn hóa Order Date và Ship Date.")
+
+        return self.df
