@@ -80,3 +80,29 @@ class DataLoader:
         logging.info("Hoàn thành chuẩn hóa Order Date và Ship Date.")
 
         return self.df
+    def remove_duplicates(self):
+        """Giai đoạn 1: Xử lý dữ liệu trùng lặp (Phân công: Ly)"""
+        
+        if self.df is None or self.df.empty:
+            logging.warning("Chưa có dữ liệu để xử lý trùng lặp.")
+            return self.df
+
+        initial_rows = len(self.df)
+        logging.info(f"Số dòng trước khi xử lý trùng lặp: {initial_rows}")
+
+        cols_to_check = [col for col in self.df.columns if col != 'Row ID']
+
+        self.df = self.df.drop_duplicates(subset=cols_to_check, keep='first')
+
+        final_rows = len(self.df)
+        removed_rows = initial_rows - final_rows
+
+        logging.info(
+            f"[Ly] Quyết định: Phát hiện cặp Row 3406 và Row 3407 trùng lặp toàn bộ thông tin đơn hàng."
+        )
+        logging.info(
+            f"[Ly] Quyết định xử lý: Đã xóa {removed_rows} bản ghi bị trùng (bao gồm Row 3407), giữ lại bản ghi xuất hiện đầu tiên."
+        )
+        logging.info(f"Số dòng sau khi xóa trùng lặp: {final_rows}")
+
+        return self.df
