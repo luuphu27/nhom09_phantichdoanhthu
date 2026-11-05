@@ -80,29 +80,35 @@ class DataLoader:
         logging.info("Hoàn thành chuẩn hóa Order Date và Ship Date.")
 
         return self.df
+
     def remove_duplicates(self):
-        """Giai đoạn 1: Xử lý dữ liệu trùng lặp (Phân công: Ly)"""
-        
+
         if self.df is None or self.df.empty:
             logging.warning("Chưa có dữ liệu để xử lý trùng lặp.")
             return self.df
 
         initial_rows = len(self.df)
-        logging.info(f"Số dòng trước khi xử lý trùng lặp: {initial_rows}")
+        logging.info(f"[Ly] Số dòng trước khi xử lý trùng lặp: {initial_rows}")
 
         cols_to_check = [col for col in self.df.columns if col != 'Row ID']
 
-        self.df = self.df.drop_duplicates(subset=cols_to_check, keep='first')
+        dup_mask = self.df.duplicated(subset=cols_to_check, keep='first')
+        removed_ids = self.df.loc[dup_mask, 'Row ID'].tolist()
+
+        self.df = self.df[~dup_mask].reset_index(drop=True)
 
         final_rows = len(self.df)
         removed_rows = initial_rows - final_rows
 
-        logging.info(
-            f"[Ly] Quyết định: Phát hiện cặp Row 3406 và Row 3407 trùng lặp toàn bộ thông tin đơn hàng."
+        if removed_rows > 0:
+            logging.info(
+            f"[Ly] Quyết định: Phát hiện {removed_rows} bản ghi trùng lặp toàn bộ thông tin đơn hàng "
+            f"(trừ Row ID). Row ID bị xóa: {removed_ids}."
         )
-        logging.info(
-            f"[Ly] Quyết định xử lý: Đã xóa {removed_rows} bản ghi bị trùng (bao gồm Row 3407), giữ lại bản ghi xuất hiện đầu tiên."
-        )
-        logging.info(f"Số dòng sau khi xóa trùng lặp: {final_rows}")
+            logging.info("[Ly] Quyết định xử lý: Giữ lại bản ghi xuất hiện đầu tiên, xóa các bản ghi sau.")
+        else:
+            logging.info("[Ly] Không phát hiện bản ghi trùng lặp.")
 
+        logging.info(f"[Ly] Số dòng sau khi xóa trùng lặp: {final_rows}")
         return self.df
+
